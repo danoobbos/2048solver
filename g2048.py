@@ -4,8 +4,8 @@ class board2048():
 
     def __init__(self) -> None:
         self.directions = {
-            'up':(1, 1),
-            'down':(-1, 1),
+            'up':(-1, 1),
+            'down':(1, 1),
             'right':(1, 0),
             'left':(-1, 0)
         }
@@ -35,12 +35,17 @@ class board2048():
         return None
     
     def slide(self, direction):
-        directionCord = self.directions[direction][0]
-        for i in range(4):
-            cordinate = (directionCord[0]*-1, directionCord[1]*-1)
+        directionTuple = self.directions[direction]
+        startingCord = int((directionTuple[0]*-1.5)+1.5)
+        cordList = [[0, 0], [1, 1], [2, 2], [3, 3]]
+
+        for i in cordList:
+            i[directionTuple[1]] = startingCord
+        
+        print(cordList)
+
 
 
 board2048_1 = board2048()
 board2048_1.newBlock()
-board2048_1.printBoard()
-print(board2048_1.getIndex((1, 1)))
+board2048_1.slide('right')
