@@ -68,5 +68,28 @@ class board2048():
                     latestEmptyList[j] = cordList[j].copy()
                 
                 cordList[j][directionTuple[1]] += directionTuple[0]*-1
+    
+    def slide(self, direction):
+        directionTuple = self.directions[direction]
+        startingCord = int((directionTuple[0]*1.5)+1.5)
+        cordList = [[0, 0], [1, 1], [2, 2], [3, 3]]
+
+        latestEmptyList = [-1, -1, -1, -1]
+
+        for i in cordList:
+            i[directionTuple[1]] = startingCord
+        
+        for i in range(4):
+            for j in range(4):
+                if latestEmptyList[j] != -1 and self.board[self.getIndex(cordList[j])] != 0:
+                    self.board[self.getIndex(latestEmptyList[j])] = self.board[self.getIndex(cordList[j])]
+                    self.board[self.getIndex(cordList[j])] = 0
+
+                    latestEmptyList[j][directionTuple[1]] += directionTuple[0]*-1
+
+                if latestEmptyList[j] == -1 and self.board[self.getIndex(cordList[j])] == 0:
+                    latestEmptyList[j] = cordList[j].copy()
+                
+                cordList[j][directionTuple[1]] += directionTuple[0]*-1
 
 board2048_1 = board2048()
