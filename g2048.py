@@ -69,27 +69,39 @@ class board2048():
                 
                 cordList[j][directionTuple[1]] += directionTuple[0]*-1
     
-    def slide(self, direction):
+    def merge(self, direction):
         directionTuple = self.directions[direction]
         startingCord = int((directionTuple[0]*1.5)+1.5)
         cordList = [[0, 0], [1, 1], [2, 2], [3, 3]]
 
-        latestEmptyList = [-1, -1, -1, -1]
-
         for i in cordList:
             i[directionTuple[1]] = startingCord
         
-        for i in range(4):
+        for i in range(3):
             for j in range(4):
-                if latestEmptyList[j] != -1 and self.board[self.getIndex(cordList[j])] != 0:
-                    self.board[self.getIndex(latestEmptyList[j])] = self.board[self.getIndex(cordList[j])]
-                    self.board[self.getIndex(cordList[j])] = 0
-
-                    latestEmptyList[j][directionTuple[1]] += directionTuple[0]*-1
-
-                if latestEmptyList[j] == -1 and self.board[self.getIndex(cordList[j])] == 0:
-                    latestEmptyList[j] = cordList[j].copy()
+                lookCord = cordList[j].copy()
+                lookCord[directionTuple[1]] += directionTuple[0]*-1
+                workingValues = [self.board[self.getIndex(cordList[j])], self.board[self.getIndex(lookCord)]]
+                if workingValues[0] != 0 and workingValues[1] == workingValues[0]:
+                    print(f'got here {workingValues}')
+                    self.board[self.getIndex(cordList[j])] = int(workingValues[1])+1
+                    self.board[self.getIndex(lookCord)] = 0
                 
-                cordList[j][directionTuple[1]] += directionTuple[0]*-1
+                cordList[j] = lookCord
+    
+    def play(self, direction):
+        self.slide(direction)
+        self.merge(direction)
+        self.slide(direction)
+        self.newBlock()
 
 board2048_1 = board2048()
+board2048_1.newBlock()
+board2048_1.printBoard()
+while True:
+    inp = input('>>')
+    if not inp in ('w', 'a', 's', 'd'):
+        break
+    dire = {'w':'up', 'a':'left', 's':'down', 'd':'right'}[inp]
+    board2048_1.play(dire)
+    board2048_1.printBoard()
