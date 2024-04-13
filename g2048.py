@@ -21,7 +21,7 @@ class board2048():
         for i, j in enumerate(self.board):
             if j == 0:
                 indecies.append(i)
-        self.board[choice(self.indecies)] = choice((1, 2))
+        self.board[choice(indecies)] = choice((1, 2))
 
     def printBoard(self):
         for i in range(4):
