@@ -92,6 +92,56 @@ class board2048():
                 cordList[j] = lookCord
         return board
     
+    def recursiveFloodSearch(self, board, index, restrictedIndecies):
+        restrictedIndecies.append(index)
+        count = 1
+
+        cord = (index % 4, index // 4)
+        searchCords = [(cord[0]+1, cord[1]), (cord[0]-1, cord[1]), (cord[0], cord[1]+1), (cord[0], cord[1]-1)]
+
+        temp = []
+        for i in searchCords:
+            if -1 < i[0] < 4 and -1 < i[1] < 4:
+                temp.append(i)
+        searchCords = temp
+
+        lookNum = board[index]
+        for i in searchCords:
+            searchIndex = self.getIndex(i)
+            if searchIndex in restrictedIndecies:
+                continue
+
+            if board[searchIndex] == lookNum:
+                count += self.recursiveFloodSearch(board, searchIndex, restrictedIndecies)
+
+        return count
+    
+    def getBoardScore(self, direction):
+        tempBoard = self.board.copy()
+
+        if direction in ('up', 'down', 'left', 'right'):
+            self.slide(direction, tempBoard)
+            self.merge(direction, tempBoard)
+            self.slide(direction, tempBoard)
+
+        #highest value
+        highestValue = max(tempBoard)
+
+        #most number of touching
+        restrictedIndecies = []
+        completeMatches = []
+        for i in range(len(tempBoard)):
+            if tempBoard[i] == 0 or i in restrictedIndecies:
+                continue
+
+            count = self.recursiveFloodSearch(tempBoard, i, restrictedIndecies)
+
+            completeMatches.append((tempBoard[i], count))
+
+        return (completeMatches, restrictedIndecies)
+        #bonus
+        #total score
+
     def play(self, direction):
         self.slide(direction, self.board)
         self.merge(direction, self.board)
@@ -103,8 +153,14 @@ board2048_1.newBlock()
 board2048_1.printBoard()
 while True:
     inp = input('>>')
-    if not inp in ('w', 'a', 's', 'd'):
+
+    if not inp in ('w', 'a', 's', 'd', 'p'):
         break
-    dire = {'w':'up', 'a':'left', 's':'down', 'd':'right'}[inp]
-    board2048_1.play(dire)
-    board2048_1.printBoard()
+
+    if inp == 'p':
+        print(board2048_1.getBoardScore('a'))
+
+    else:
+        dire = {'w':'up', 'a':'left', 's':'down', 'd':'right'}[inp]
+        board2048_1.play(dire)
+        board2048_1.printBoard()
