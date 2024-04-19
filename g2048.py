@@ -92,6 +92,74 @@ class board2048():
                 cordList[j] = lookCord
         return board
     
+    def recursiveFloodSearch(self, board, index, restrictedIndecies):
+        restrictedIndecies.append(index)
+        count = 1
+
+        cord = (index % 4, index // 4)
+        searchCords = [(cord[0]+1, cord[1]), (cord[0]-1, cord[1]), (cord[0], cord[1]+1), (cord[0], cord[1]-1)]
+
+        temp = []
+        for i in searchCords:
+            if -1 < i[0] < 4 and -1 < i[1] < 4:
+                temp.append(i)
+        searchCords = temp
+
+        lookNum = board[index]
+        for i in searchCords:
+            searchIndex = self.getIndex(i)
+            if searchIndex in restrictedIndecies:
+                continue
+
+            if board[searchIndex] == lookNum:
+                count += self.recursiveFloodSearch(board, searchIndex, restrictedIndecies)
+
+        return count
+    
+    def getBoardScore(self, direction):
+        tempBoard = self.board.copy()
+
+        if direction in ('up', 'down', 'left', 'right'):
+            self.slide(direction, tempBoard)
+            self.merge(direction, tempBoard)
+            self.slide(direction, tempBoard)
+
+        #highest value
+        highestValue = max(tempBoard)
+
+        #least filled spaces
+        minimizeFilledSpaces = tempBoard.count(0)
+
+        #most number of touching
+        restrictedIndecies = []
+        completeMatches = []
+        for i in range(len(tempBoard)):
+            if tempBoard[i] == 0 or i in restrictedIndecies:
+                continue
+
+            count = self.recursiveFloodSearch(tempBoard, i, restrictedIndecies)
+
+            completeMatches.append((tempBoard[i], count))
+        
+        maximizeTouchingValue = 0
+        for i in completeMatches:
+            maximizeTouchingValue += (i[0] * (i[1] - 1))
+    
+        #bonus
+        sortedTableKey = tempBoard.copy()
+        sortedTableKey.sort(reverse=True)
+
+        bonusOrder = [15, 14, 13, 12, 8, 9, 10, 11, 7, 6, 5, 4, 0, 1, 2, 3]
+        bonus = 0
+        for i in range(len(bonusOrder)):
+            if tempBoard[bonusOrder[i]] == sortedTableKey[i]:
+                bonus += tempBoard[bonusOrder[i]]
+            else:
+                break
+
+        #total score
+        return (highestValue*3, minimizeFilledSpaces, maximizeTouchingValue, bonus, highestValue*3+maximizeTouchingValue+bonus+maximizeTouchingValue)
+
     def play(self, direction):
         self.slide(direction, self.board)
         self.merge(direction, self.board)
@@ -103,8 +171,24 @@ board2048_1.newBlock()
 board2048_1.printBoard()
 while True:
     inp = input('>>')
-    if not inp in ('w', 'a', 's', 'd'):
+
+    if not inp in ('w', 'a', 's', 'd', 'p', 'x'):
         break
-    dire = {'w':'up', 'a':'left', 's':'down', 'd':'right'}[inp]
-    board2048_1.play(dire)
-    board2048_1.printBoard()
+
+    if inp == 'p':
+        print(board2048_1.getBoardScore('a'))
+
+    elif inp == 'x':
+        bestPlay = ['', 0, ()]
+        for i in ('down', 'right', 'left', 'up'):
+            playValue = board2048_1.getBoardScore(i)
+            if playValue[4] > bestPlay[1]:
+                bestPlay = [i, playValue[4], playValue]
+        board2048_1.play(bestPlay[0])
+        board2048_1.printBoard()
+        print(bestPlay)
+
+    else:
+        dire = {'w':'up', 'a':'left', 's':'down', 'd':'right'}[inp]
+        board2048_1.play(dire)
+        board2048_1.printBoard()
