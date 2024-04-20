@@ -159,6 +159,9 @@ class board2048():
 
         #total score
         return (highestValue*3, minimizeFilledSpaces, maximizeTouchingValue, bonus, highestValue*3+maximizeTouchingValue+bonus+maximizeTouchingValue)
+    
+    def generateNextMove(self):
+        priorityOrder = [15, 14, 13, 12, 8, 9, 10, 11, 7, 6, 5, 4, 0, 1, 2, 3]
 
     def play(self, direction):
         self.slide(direction, self.board)
