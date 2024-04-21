@@ -161,7 +161,33 @@ class board2048():
         return (highestValue*3, minimizeFilledSpaces, maximizeTouchingValue, bonus, highestValue*3+maximizeTouchingValue+bonus+maximizeTouchingValue)
     
     def generateNextMove(self):
-        priorityOrder = [15, 14, 13, 12, 8, 9, 10, 11, 7, 6, 5, 4, 0, 1, 2, 3]
+        priorityOrder = {
+            15:('up'),
+            14:('right'),
+            13:('right'),
+            12:('right'),
+            8:('down'),
+            9:('left'),
+            10:('left'),
+            11:('left'),
+            7:('down'),
+            6:('right'),
+            5:('right'),
+            4:('right'),
+            0:('down'),
+            1:('left'),
+            2:('left'),
+            3:('left')
+        }
+
+        currentTileValue = 100
+        for i, j in enumerate(priorityOrder.keys()):
+            lastTileValue = currentTileValue
+            currentTileValue = self.board[j]
+
+            if currentTileValue == lastTileValue:
+                return priorityOrder[j]
+
 
     def play(self, direction):
         self.slide(direction, self.board)
