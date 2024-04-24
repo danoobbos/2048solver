@@ -167,12 +167,12 @@ class board2048():
         if starterCord[0] == finderCord[0]:
             aligned = True
             cordDistance = starterCord[1] - finderCord[1]
-            cordIter = cordDistance / abs(cordDistance)
+            cordIter = int(cordDistance / abs(cordDistance))
             cordDistance = abs(cordDistance)
             print(cordDistance, '   ', cordIter)
 
             for i in range(cordDistance-1):
-                if self.board[self.getIndex((starterCord[0], starterCord[1] - i * cordIter))] != 0:
+                if self.board[self.getIndex((starterCord[0], starterCord[1] - (i+1) * cordIter))] != 0:
                     aligned = False
                     break
 
@@ -182,12 +182,12 @@ class board2048():
         if starterCord[1] == finderCord[1]:
             aligned = True
             cordDistance = starterCord[0] - finderCord[0]
-            cordIter = cordDistance / abs(cordDistance)
+            cordIter = int(cordDistance / abs(cordDistance))
             cordDistance = abs(cordDistance)
             print(cordDistance, '   ', cordIter)
 
             for i in range(cordDistance - 1):
-                if self.board[self.getIndex((starterCord[0], starterCord[1] - i * cordIter))] != 0:
+                if self.board[self.getIndex((starterCord[0], starterCord[0] - (i+1) * cordIter))] != 0:
                     aligned = False
                     break
 
@@ -238,7 +238,7 @@ class board2048():
                     los = self.lineOfSight(j, i[1])
 
                     if los != False:
-                        return {(0, -1):'down', (0, 1):'up', (1, -1):'left', (1, 1): 'right'}[los]
+                        return {(0, 1):'down', (0, -1):'up', (1, -1):'left', (1, 1): 'right'}[los]
         return 'joemama'
 
     def play(self, direction):
