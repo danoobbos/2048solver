@@ -25,7 +25,7 @@ class board2048():
 
         if len(indecies) == 0:
             return
-        
+
         self.board[choice(indecies)] = choice((1, 2))
 
     def printBoard(self, board = -1):
@@ -47,7 +47,7 @@ class board2048():
         if index >= 0 and index <= 15 and isinstance(index, int):
             return index
         return None
-    
+
     def slide(self, direction, board):
         directionTuple = self.directions[direction]
         startingCord = int((directionTuple[0]*1.5)+1.5)
@@ -57,7 +57,7 @@ class board2048():
 
         for i in cordList:
             i[directionTuple[1]] = startingCord
-        
+
         for i in range(4):
             for j in range(4):
                 if latestEmptyList[j] != -1 and board[self.getIndex(cordList[j])] != 0:
@@ -68,10 +68,10 @@ class board2048():
 
                 if latestEmptyList[j] == -1 and board[self.getIndex(cordList[j])] == 0:
                     latestEmptyList[j] = cordList[j].copy()
-                
+
                 cordList[j][directionTuple[1]] += directionTuple[0]*-1
         return board
-    
+
     def merge(self, direction, board):
         directionTuple = self.directions[direction]
         startingCord = int((directionTuple[0]*1.5)+1.5)
@@ -79,7 +79,7 @@ class board2048():
 
         for i in cordList:
             i[directionTuple[1]] = startingCord
-        
+
         for i in range(3):
             for j in range(4):
                 lookCord = cordList[j].copy()
@@ -88,10 +88,10 @@ class board2048():
                 if workingValues[0] != 0 and workingValues[1] == workingValues[0]:
                     board[self.getIndex(cordList[j])] = int(workingValues[1])+1
                     board[self.getIndex(lookCord)] = 0
-                
+
                 cordList[j] = lookCord
         return board
-    
+
     def recursiveFloodSearch(self, board, index, restrictedIndecies):
         restrictedIndecies.append(index)
         count = 1
@@ -115,7 +115,7 @@ class board2048():
                 count += self.recursiveFloodSearch(board, searchIndex, restrictedIndecies)
 
         return count
-    
+
     def getBoardScore(self, direction):
         tempBoard = self.board.copy()
 
@@ -140,11 +140,11 @@ class board2048():
             count = self.recursiveFloodSearch(tempBoard, i, restrictedIndecies)
 
             completeMatches.append((tempBoard[i], count))
-        
+
         maximizeTouchingValue = 0
         for i in completeMatches:
             maximizeTouchingValue += (i[0] * (i[1] - 1))
-    
+
         #bonus
         sortedTableKey = tempBoard.copy()
         sortedTableKey.sort(reverse=True)
@@ -159,7 +159,43 @@ class board2048():
 
         #total score
         return (highestValue*3, minimizeFilledSpaces, maximizeTouchingValue, bonus, highestValue*3+maximizeTouchingValue+bonus+maximizeTouchingValue)
-    
+
+    def lineOfSight(self, starterIndex, finderIndex):
+        starterCord = (starterIndex % 4, starterIndex // 4)
+        finderCord = (finderIndex % 4, finderIndex // 4)
+
+        if starterCord[0] == finderCord[0]:
+            aligned = True
+            cordDistance = starterCord[1] - finderCord[1]
+            cordIter = int(cordDistance / abs(cordDistance))
+            cordDistance = abs(cordDistance)
+            print(cordDistance, '   ', cordIter)
+
+            for i in range(cordDistance-1):
+                if self.board[self.getIndex((starterCord[0], starterCord[1] - (i+1) * cordIter))] != 0:
+                    aligned = False
+                    break
+
+            if aligned:
+                return 0, cordIter
+
+        if starterCord[1] == finderCord[1]:
+            aligned = True
+            cordDistance = starterCord[0] - finderCord[0]
+            cordIter = int(cordDistance / abs(cordDistance))
+            cordDistance = abs(cordDistance)
+            print(cordDistance, '   ', cordIter)
+
+            for i in range(cordDistance - 1):
+                if self.board[self.getIndex((starterCord[0], starterCord[0] - (i+1) * cordIter))] != 0:
+                    aligned = False
+                    break
+
+            if aligned:
+                return 1, cordIter
+
+        return False
+
     def generateNextMove(self):
         priorityOrder = {
             15:('up'),
@@ -185,9 +221,25 @@ class board2048():
             lastTileValue = currentTileValue
             currentTileValue = self.board[j]
 
+            if currentTileValue == 0:
+                return 'joemama'
+
             if currentTileValue == lastTileValue:
                 return priorityOrder[j]
 
+            if self.board.count(self.board[j]) > 1:
+                matchBoard = []
+                for k, l in enumerate(self.board):
+                    if l == self.board[j] and k != j:
+                        matchBoard.append((l, k))
+                print(matchBoard)
+
+                for i in matchBoard:
+                    los = self.lineOfSight(j, i[1])
+
+                    if los != False:
+                        return {(0, 1):'down', (0, -1):'up', (1, -1):'left', (1, 1): 'right'}[los]
+        return 'joemama'
 
     def play(self, direction):
         self.slide(direction, self.board)
@@ -195,29 +247,31 @@ class board2048():
         self.slide(direction, self.board)
         self.newBlock()
 
-board2048_1 = board2048()
-board2048_1.newBlock()
-board2048_1.printBoard()
-while True:
-    inp = input('>>')
+if __name__ == '__main__':
+    board2048_1 = board2048()
+    board2048_1.newBlock()
+    board2048_1.printBoard()
+    while True:
+        inp = input('>>')
 
-    if not inp in ('w', 'a', 's', 'd', 'p', 'x'):
-        break
+        if not inp in ('w', 'a', 's', 'd', 'p', 'x'):
+            break
 
-    if inp == 'p':
-        print(board2048_1.getBoardScore('a'))
+        if inp == 'p':
+            print(board2048_1.getBoardScore('a'))
 
-    elif inp == 'x':
-        bestPlay = ['', 0, ()]
-        for i in ('down', 'right', 'left', 'up'):
-            playValue = board2048_1.getBoardScore(i)
-            if playValue[4] > bestPlay[1]:
-                bestPlay = [i, playValue[4], playValue]
-        board2048_1.play(bestPlay[0])
-        board2048_1.printBoard()
-        print(bestPlay)
+        elif inp == 'x':
+            bestPlay = ['', 0, ()]
+            for i in ('down', 'right', 'left', 'up'):
+                playValue = board2048_1.getBoardScore(i)
+                if playValue[4] > bestPlay[1]:
+                    bestPlay = [i, playValue[4], playValue]
+            board2048_1.play(bestPlay[0])
+            board2048_1.printBoard()
+            print(bestPlay)
 
-    else:
-        dire = {'w':'up', 'a':'left', 's':'down', 'd':'right'}[inp]
-        board2048_1.play(dire)
-        board2048_1.printBoard()
+        else:
+            dire = {'w':'up', 'a':'left', 's':'down', 'd':'right'}[inp]
+            board2048_1.play(dire)
+            board2048_1.printBoard()
+            print(board2048_1.generateNextMove())
