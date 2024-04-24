@@ -1,3 +1,7 @@
+'''
+change log:
+
+'''
 from random import choice
 
 class board2048():
@@ -104,7 +108,7 @@ board2048_1.printBoard()
 while True:
     inp = input('>>')
     if not inp in ('w', 'a', 's', 'd'):
-        break
+        continue
     dire = {'w':'up', 'a':'left', 's':'down', 'd':'right'}[inp]
     board2048_1.play(dire)
     board2048_1.printBoard()
