@@ -24,9 +24,10 @@ class board2048():
                 indecies.append(i)
 
         if len(indecies) == 0:
-            return
+            return True
 
         self.board[choice(indecies)] = choice((1, 2))
+        return False
 
     def printBoard(self, board = -1):
         if board == -1:
